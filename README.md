@@ -13,3 +13,6 @@ Minimalist endless arcade game. HTML5 Canvas + vanilla JS, installable offline P
 4. When you change any file, bump `V` in `sw.js`, otherwise returning players keep the cached version.
 
 Local test: `python3 -m http.server 8000` then open http://localhost:8000
+
+## Power-ups
+Slow-mo (5s, world runs at 60% speed), Magnet (8s, pulls points in), Shield (absorbs one crash). Collect the glowing symbols; they appear every ~9 rows.
