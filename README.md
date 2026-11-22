@@ -16,3 +16,6 @@ Local test: `python3 -m http.server 8000` then open http://localhost:8000
 
 ## Power-ups
 Slow-mo (5s, world runs at 60% speed), Magnet (8s, pulls points in), Shield (absorbs one crash). Collect the glowing symbols; they appear every ~9 rows.
+
+## Shop, side button, speed
+Points (◆) are banked after each run and spent in the Shop on Shield (8s protection), Slow-mo, Pulse and ◆x2. Equip one; use it from the side button (hold ~0.4s and drag to move it) or make it the double-tap action in Settings (Turbo then moves to the side button). Settings also has speed x1–x5 (speed is capped so obstacles stay visible long enough to react).
