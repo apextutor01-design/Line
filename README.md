@@ -22,3 +22,9 @@ Points (◆) are banked after each run and spent in the Shop on Shield (8s prote
 
 ## Revive
 After a crash you can pay ◆25, then ◆35, then ◆45 (max 3 per run) to continue with 3s protection and the obstacles right ahead cleared. Planned: replace with a rewarded ad later.
+
+## Missions & zones
+12 missions (per-run and lifetime) pay ◆ automatically when completed. The color scheme changes every 5,000 m.
+
+## v8
+Daily missions + streak, skins, badges, zone twists, weekly leaderboard, ♛ crowns (needs supabase_v2.sql).
