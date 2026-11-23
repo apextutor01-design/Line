@@ -47,6 +47,7 @@ input{width:min(240px,70vw);padding:12px;background:none;border:1px solid #fff5;
 <div id="tw"><div id="tb"><i id="tf"></i></div><div id="tl"></div></div>
 <section class="scr on" id="home"><h1>LINE</h1><p id="hb"></p><br><button class="b pr" id="play">PLAY</button><div class="row"><button class="b h" id="shh">SHOP</button><button class="b h" id="lbh">BOARD</button></div><button class="b" id="set">SETTINGS</button><p style="margin-top:18px;font-size:10px">TAP · LANE &nbsp;&nbsp; DOUBLE-TAP · TURBO</p></section>
 <section class="scr" id="pause"><h2>PAUSED</h2><button class="b pr" id="res">RESUME</button><button class="b" id="hm1">HOME</button></section>
+<section class="scr" id="rev"><h2>CRASHED</h2><p id="rvc"></p><br><button class="b pr" id="rvb"></button><button class="b" id="rve">END RUN</button></section>
 <section class="scr" id="over"><h2>GAME OVER</h2><div class="big" id="os">0</div><p id="od"></p><p id="ob"></p><br><button class="b pr" id="rs">RESTART</button><div class="row"><button class="b h" id="sho">SHOP</button><button class="b h" id="lbo">BOARD</button></div><button class="b" id="hm2">HOME</button></section>
 <section class="scr" id="lb"><h2>LEADERBOARD</h2><input id="nm" maxlength="12" placeholder="YOUR NICKNAME" autocomplete="off"><div id="lbl"></div><button class="b pr" id="lbk">BACK</button></section>
 <section class="scr" id="shop"><h2>SHOP</h2><p id="bal" class="nb"></p><div id="shp"></div><p style="font-size:10px">EARN ◆ BY COLLECTING POINTS IN RUNS</p><button class="b pr" id="sbk">BACK</button></section>
@@ -60,7 +61,7 @@ try{Object.assign(S,JSON.parse(localStorage.getItem('line.v1')||'{}'))}catch(e){
 S.inv=S.inv||{};S.coins=S.coins|0;
 const save=()=>{try{localStorage.setItem('line.v1',JSON.stringify(S))}catch(e){}};
 let W,H,s,dpr,LX=[0,0],PY,state='home';
-let lane=0,px=0,dist=0,pts=0,t=0,tm=1,turboT=0,cdT=0,gap=0,lastLane=0,slow=0,mag=0,shield=0,prot=0,dbl=0,bonus=0,pwCool=4,lastPw='',obs=[],pk=[],tr=[],fl=0,rp=[],tapTimer=0,lastSc=-1,tmr=0;
+let lane=0,px=0,dist=0,pts=0,t=0,tm=1,turboT=0,cdT=0,gap=0,lastLane=0,slow=0,mag=0,shield=0,prot=0,dbl=0,bonus=0,rv=0,runBanked=0,pwCool=4,lastPw='',obs=[],pk=[],tr=[],fl=0,rp=[],tapTimer=0,lastSc=-1,tmr=0;
 function rs(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr|0;cv.height=H*dpr|0;s=Math.min(W/360,H/640,1.5);LX=[W/2-62*s,W/2+62*s];PY=H*.76;c.setTransform(dpr,0,0,dpr,0,0);if(state!=='play')px=LX[lane]}
 addEventListener('resize',rs);addEventListener('orientationchange',rs);rs();
 const st=[];for(let i=0;i<28;i++)st.push({x:Math.random(),y:Math.random(),v:.2+Math.random()*.8,a:.1+Math.random()*.3,z:1+(Math.random()<.2)});
@@ -69,8 +70,8 @@ function em(x,y,vx,vy,l,col,force){if(!S.fx&&!force)return;const p=P[pi=(pi+1)%8
 const burst=(x,y,n,col,sp,f)=>{for(let i=0;i<n;i++){const a=Math.random()*6.283,v=(.3+Math.random())*sp*s;em(x,y,Math.cos(a)*v,Math.sin(a)*v,.4+Math.random()*.5,col,f)}};
 let ac;function beep(f,d,tp,v,f2){if(!S.sfx)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();const n=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.type=tp||'sine';o.frequency.setValueAtTime(f,n);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+d);g.gain.setValueAtTime(v||.04,n);g.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+d)}catch(e){}}
 const vib=n=>{if(S.vib&&navigator.vibrate)try{navigator.vibrate(n)}catch(e){}};
-const MUL=[1,2,3,4,5],SPN=['NORMAL','X2','X3 FAST','X4 HARD','X5 INSANE'],capPx=()=>(PY+30*s)/.6,bs=()=>Math.min((230+Math.min(t,150)*2.6)*s*MUL[S.spd|0],capPx()),Q=()=>t*Math.sqrt(MUL[S.spd|0]),meters=()=>Math.floor(dist/(s*20));
-function reset(){lane=0;px=LX[0];dist=pts=t=0;tm=1;turboT=cdT=0;slow=mag=shield=prot=dbl=bonus=0;pwCool=4;lastPw='';$('pw').textContent='';gap=H*.3;lastLane=0;obs=[];pk=[];tr=[];fl=0;lastSc=-1;P.forEach(p=>p.l=0)}
+const RC=[25,35,45],MUL=[1,2,3,4,5],SPN=['NORMAL','X2','X3 FAST','X4 HARD','X5 INSANE'],capPx=()=>(PY+30*s)/.6,bs=()=>Math.min((230+Math.min(t,150)*2.6)*s*MUL[S.spd|0],capPx()),Q=()=>t*Math.sqrt(MUL[S.spd|0]),meters=()=>Math.floor(dist/(s*20));
+function reset(){lane=0;px=LX[0];dist=pts=t=0;tm=1;turboT=cdT=0;slow=mag=shield=prot=dbl=bonus=rv=runBanked=0;pwCool=4;lastPw='';$('pw').textContent='';gap=H*.3;lastLane=0;obs=[];pk=[];tr=[];fl=0;lastSc=-1;P.forEach(p=>p.l=0)}
 function spawn(b){const q=Q(),lv=Math.min(q/12,12);gap=Math.max(.62-Math.max(0,(S.spd|0)-2)*.035,1.2-lv*.05)*b;const r=Math.random();let ty=0;
  if(q>10&&r<Math.min(.4,(q-10)/80))ty=1;else if(q>22&&r>1-Math.min(.35,(q-22)/90))ty=2;
  const ln=Math.random()<.6?1-lastLane:lastLane;lastLane=ln;
@@ -101,12 +102,12 @@ function tap(){if(state!=='play')return;if(tapTimer){clearTimeout(tapTimer);tapT
 const tapClear=()=>{clearTimeout(tapTimer);tapTimer=0};
 let prev=0;
 function die(){state='dead';tapClear();fl=1;vib(70);beep(200,.45,'sawtooth',.05,35);burst(px,PY,45,'#fff',260,1);burst(px,PY,25,PU,200,1);
- const m=meters(),sc=m+pts*10,old=S.best,nb=sc>old;if(nb)S.best=sc;S.bestDist=Math.max(S.bestDist||0,m);S.coins+=pts+bonus;if(sc>(S.lbBest||0)&&(!S.pend||sc>S.pend.score))S.pend={score:sc,dist:m,pts,time:Math.floor(t)};save();submit();$('lbo').textContent=S.name?'BOARD':'JOIN';
+ const m=meters(),sc=m+pts*10,old=S.best,nb=sc>old;if(nb)S.best=sc;S.bestDist=Math.max(S.bestDist||0,m);{const g=pts+bonus-runBanked;S.coins+=g;runBanked+=g}if(sc>(S.lbBest||0)&&(!S.pend||sc>S.pend.score))S.pend={score:sc,dist:m,pts,time:Math.floor(t)};save();submit();$('lbo').textContent=S.name?'BOARD':'JOIN';
  $('os').textContent=sc;$('od').textContent=m+' M  ·  ◆ +'+(pts+bonus);$('ob').textContent=nb?'NEW PERSONAL BEST':'BEST '+old;$('ob').className=nb?'nb':'';
- clearTimeout(tmr);tmr=setTimeout(()=>{if(state==='dead')go('over')},700)}
+ clearTimeout(tmr);tmr=setTimeout(()=>{if(state==='dead'){if(rv<3&&S.coins>=RC[rv]){$('rvc').textContent='YOU HAVE ◆ '+S.coins+'  ·  '+(3-rv)+' LEFT';$('rvb').textContent='REVIVE  ◆ '+RC[rv];go('rev')}else go('over')}},700)}
 function go(n){state=n;tapClear();clearTimeout(tmr);
- for(const i of['home','pause','over','sets','lb','shop'])$(i).classList.toggle('on',i===(n==='settings'?'sets':n));
- $('hud').classList.toggle('on',n==='play'||n==='pause'||n==='dead');$('tw').classList.toggle('on',n==='play'||n==='pause'||n==='dead');$('pbtn').classList.toggle('on',n==='play');
+ for(const i of['home','pause','over','sets','lb','shop','rev'])$(i).classList.toggle('on',i===(n==='settings'?'sets':n));
+ $('hud').classList.toggle('on',n==='play'||n==='pause'||n==='dead'||n==='rev');$('tw').classList.toggle('on',n==='play'||n==='pause'||n==='dead');$('pbtn').classList.toggle('on',n==='play');
  if(n==='home'){reset();$('hb').textContent='◆ '+S.coins+'  ·  '+(S.best?'BEST  '+S.best:'TAP TO SWITCH LANES')}}
 function start(){reset();go('play');const h=$('hint');if(!S.best){h.classList.add('on');setTimeout(()=>h.classList.remove('on'),4500)}}
 function pause(){if(state==='play')go('pause')}
@@ -130,7 +131,7 @@ function draw(dt){
   if(o.ty===2&&!o.lk){c.globalAlpha=o.f<.3?.3+.3*Math.sin(now*40):.14;c.strokeStyle=o.lane?CY:PU;c.lineWidth=1.5;c.strokeRect(LX[o.lane^1]-w/2,o.y-h/2,w,h)}
   rect(o.x,o.y,w,h,o.ty===0?CY:o.ty===1?PU:(o.lane?PU:CY),.85)}
  for(const k of pk){const r=(1+.15*Math.sin(now*6))*8*s;if(k.ty){pw(k,r*1.5);continue}c.fillStyle=CY;c.globalAlpha=.2;c.beginPath();c.arc(k.x,k.y,r*1.8,0,6.283);c.fill();c.globalAlpha=.95;c.fillStyle='#fff';c.beginPath();c.moveTo(k.x,k.y-r);c.lineTo(k.x+r*.7,k.y);c.lineTo(k.x,k.y+r);c.lineTo(k.x-r*.7,k.y);c.fill()}
- if(state!=='dead'){
+ if(state!=='dead'&&state!=='rev'){
   const pts2=tr.length>1?tr:[{x:px,y:PY},{x:px,y:PY+130*s}],ly=pts2[pts2.length-1].y,g=c.createLinearGradient(0,PY,0,ly+1);
   g.addColorStop(0,turboT>0?CY:'#fff');g.addColorStop(1,'rgba(164,92,255,0)');
   glow(3*s,g,()=>{c.beginPath();c.moveTo(pts2[0].x,pts2[0].y);for(let i=1;i<pts2.length;i++)c.lineTo(pts2[i].x,pts2[i].y);c.stroke()});
@@ -149,7 +150,7 @@ requestAnimationFrame(ts=>{prev=ts;loop(ts)});
 cv.addEventListener('pointerdown',e=>{e.preventDefault();if(state==='play'){rp.push({x:e.clientX,y:e.clientY,t:0});if(rp.length>4)rp.shift();tap()}});
 addEventListener('keydown',e=>{const k=e.key;if(['ArrowLeft','ArrowRight','ArrowUp',' '].includes(k))e.preventDefault();if(e.repeat)return;
  if(state==='play'){if(k==='ArrowLeft'||k==='a')lane=0;else if(k==='ArrowRight'||k==='d')lane=1;else if(k===' ')sw();else if(k==='ArrowUp'||k==='Shift'||k==='t')turbo();else if(k==='e'||k==='ArrowDown')useItem();else if(k==='p'||k==='Escape')pause()}
- else if(state==='pause'&&(k==='p'||k==='Escape'||k==='Enter'))go('play');else if((state==='home'||state==='over')&&(k==='Enter'||k===' '))start()});
+ else if(state==='pause'&&(k==='p'||k==='Escape'||k==='Enter'))go('play');else if((state==='home'||state==='over')&&(k==='Enter'||k===' '))start();else if(state==='rev'&&k==='Enter')revive()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});addEventListener('blur',pause);
 const on=(i,f)=>$(i).addEventListener('click',f);
 on('play',start);on('rs',start);on('pb',pause);on('res',()=>go('play'));on('hm1',()=>go('home'));on('hm2',()=>go('home'));on('set',()=>{lab();go('settings')});on('bk',()=>go('home'));
@@ -193,11 +194,14 @@ function shop(){const w=$('shp');w.textContent='';$('bal').textContent='◆ '+S.
   by.onclick=()=>{if(S.coins>=it.p){S.coins-=it.p;S.inv[it.k]=(S.inv[it.k]|0)+1;if(!(S.inv[S.eq]>0))S.eq=it.k;save();beep(660,.1);shop()}};
   const eq=document.createElement('button');eq.className='mb';eq.textContent=S.eq===it.k?'EQUIPPED':'EQUIP';eq.onclick=()=>{S.eq=it.k;lastBt='';save();shop()};
   r.append(l,by,eq);w.appendChild(r)}}
+function revive(){if((state!=='rev'&&state!=='dead')||rv>=3||S.coins<RC[rv])return;S.coins-=RC[rv];rv++;save();
+ obs=obs.filter(o=>o.y<PY-320*s||o.y>PY+40*s);burst(px,PY,30,'#fff',240);burst(px,PY,16,CY,200);fl=0;prot=Math.max(prot,3);tr=[];beep(440,.4,'triangle',.05,1200);vib(30);go('play')}
+on('rvb',revive);on('rve',()=>go('over'));
 let shFrom='home';const openShop=f=>{shFrom=f;go('shop');shop()};
 on('shh',()=>openShop('home'));on('sho',()=>openShop('over'));on('sbk',()=>go(shFrom));
 on('tdt',()=>{S.dtap=S.dtap==='item'?'turbo':'item';lastBt='';save();lab()});on('tsp',()=>{S.spd=((S.spd|0)+1)%5;save();lab()});on('rbp',()=>{S.bx=.86;S.by=.55;save();placeBtn()});
 go('home');
-window.LINE={useItem,capPx,Q,get prot(){return prot},get dbl(){return dbl},get bonus(){return bonus},get pk(){return pk},get shield(){return shield},set shield(v){shield=v},get mag(){return mag},get slow(){return slow},start,sw,turbo,die,get state(){return state},get obs(){return obs},get lane(){return lane},get t(){return t},get pts(){return pts},get turboT(){return turboT},get cdT(){return cdT},get tm(){return tm},get S(){return S},step:update,PY:()=>PY,bs,tap,s:()=>s};
+window.LINE={revive,get rv(){return rv},useItem,capPx,Q,get prot(){return prot},get dbl(){return dbl},get bonus(){return bonus},get pk(){return pk},get shield(){return shield},set shield(v){shield=v},get mag(){return mag},get slow(){return slow},start,sw,turbo,die,get state(){return state},get obs(){return obs},get lane(){return lane},get t(){return t},get pts(){return pts},get turboT(){return turboT},get cdT(){return cdT},get tm(){return tm},get S(){return S},step:update,PY:()=>PY,bs,tap,s:()=>s};
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
 </script></body></html>
