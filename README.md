@@ -28,3 +28,6 @@ After a crash you can pay ◆25, then ◆35, then ◆45 (max 3 per run) to conti
 
 ## v8
 Daily missions + streak, skins, badges, zone twists, weekly leaderboard, ♛ crowns (needs supabase_v2.sql).
+
+## Music
+Ten generated tracks share one tempo (108 BPM) and key, so switches land on a bar line and stay in time. A new track starts every 3,000 m. Off by default.
